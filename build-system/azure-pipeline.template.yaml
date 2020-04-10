@@ -1,7 +1,7 @@
 parameters:
   name: ''
-  displayName: ''
   vmImage: ''
+  displayName: ''
   scriptFileName: ''
   scriptArgs: 'all'
   timeoutInMinutes: 120
@@ -25,14 +25,14 @@ jobs:
           arguments: ${{ parameters.scriptArgs }}
         continueOnError: true
         condition: in( variables['Agent.OS'], 'Linux', 'Darwin' )
-      # Windows
-      - task: BatchScript@1
-        displayName: Windows Build
-        inputs:
-          filename: ${{ parameters.scriptFileName }}
-          arguments: ${{ parameters.scriptArgs }}
-        continueOnError: true
-        condition: eq( variables['Agent.OS'], 'Windows_NT' )
+      # Windows test is disabled, could not use redis container in Azure Pipelines
+#      - task: BatchScript@1
+#        displayName: Windows Build
+#        inputs:
+#          filename: ${{ parameters.scriptFileName }}
+#          arguments: ${{ parameters.scriptArgs }}
+#        continueOnError: true
+#        condition: eq( variables['Agent.OS'], 'Windows_NT' )
       - task: PublishTestResults@2
         inputs:
           testRunner: VSTest

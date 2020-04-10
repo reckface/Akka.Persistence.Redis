@@ -10,13 +10,13 @@ open Fake.DotNetCli
 open Fake.DocFxHelper
 
 // Information about the project for Nuget and Assembly info files
-let product = "Akka.Persistence.MongoDB"
+let product = "Akka.Persistence.Redis"
 let configuration = "Release"
 
 // Metadata used when signing packages and DLLs
-let signingName = "Akka.Persistence.MongoDB"
-let signingDescription = "Akka.Persistence support for SQL Server"
-let signingUrl = "https://github.com/akkadotnet/Akka.Persistence.MongoDB"
+let signingName = "Akka.Persistence.Redis"
+let signingDescription = "Akka.Persistence support for Redis"
+let signingUrl = "https://github.com/akkadotnet/Akka.Persistence.Redis"
 
 // Read release notes and version
 let solutionFile = FindFirstMatchingFile "*.sln" __SOURCE_DIRECTORY__  // dynamically look up the solution

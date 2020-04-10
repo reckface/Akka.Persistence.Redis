@@ -14,12 +14,11 @@ variables:
   - group: signingSecrets #create this group with SECRET variables `signingUsername` and `signingPassword`
   - group: nugetKeys #create this group with SECRET variables `nugetKey`
   - name: githubConnectionName
-    value: yourConnection #replace this
+    value: AkkaDotNet_Releases
   - name: projectName
-    value: yourProjectName #replace this
+    value: Akka.Persistence.Redis
   - name: githubRepositoryName
-    value: yourOrganization/yourRepo #replace this
-
+    value: akkadotnet/Akka.Persistence.Redis
 steps:
 - task: BatchScript@1
   displayName: 'FAKE Build'

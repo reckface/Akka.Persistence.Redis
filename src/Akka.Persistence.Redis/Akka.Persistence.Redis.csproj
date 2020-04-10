@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\common.props" />
+
   <PropertyGroup>
+    <AssemblyTitle>Akka.Persistence.Redis</AssemblyTitle>
+    <TargetFrameworks>$(NetStandardLibVersion);$(NetFrameworkLibVersion)</TargetFrameworks>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <TargetFrameworks>$(NetStandardVersion)</TargetFrameworks>
     <LangVersion>7.1</LangVersion>   
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -11,9 +15,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Akka" Version="$(AkkaVersion)" />
     <PackageReference Include="Akka.Persistence" Version="$(AkkaVersion)" />
     <PackageReference Include="Akka.Persistence.Query" Version="$(AkkaVersion)" />
-    <PackageReference Include="StackExchange.Redis" Version="1.2.6" />
-    <PackageReference Include="System.ValueTuple" Version="4.4.0" />
+    <PackageReference Include="Akka.Streams" Version="$(AkkaVersion)" />
+    <PackageReference Include="StackExchange.Redis" Version="$(RedisVersion)" />
+    <PackageReference Include="Akka.Persistence" Version="$(AkkaVersion)" />
+    <PackageReference Include="Akka.Persistence.Query" Version="$(AkkaVersion)" />
+    <PackageReference Include="StackExchange.Redis" Version="$(RedisVersion)" />
   </ItemGroup>
 </Project>
