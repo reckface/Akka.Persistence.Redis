@@ -1,0 +1,42 @@
+<Project>
+  <PropertyGroup>
+    <Copyright>Copyright © 2013-2020 Akka.NET Project</Copyright>
+    <Authors>Akka.NET</Authors>
+    <VersionPrefix>1.4.4</VersionPrefix>
+    <PackageTags>akka;actors;actor model;Akka;concurrency;persistence;eventsource;redis</PackageTags>
+    <PackageIconUrl>http://getakka.net/images/AkkaNetLogo.Normal.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/AkkaNetContrib/Akka.Persistence.Redis</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/AkkaNetContrib/Akka.Persistence.Redis/blob/dev/LICENSE</PackageLicenseUrl>
+    <PackageReleaseNotes>- Bump Akka to version 1.4.4
+- Update build system to use Docker.DotNet</PackageReleaseNotes>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Description>Akka.NET Persistence journal and snapshot store backed by Redis.</Description>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup>
+    <XunitVersion>2.4.1</XunitVersion>
+    <TestSdkVersion>16.5.0</TestSdkVersion>
+    <AkkaVersion>1.4.4</AkkaVersion>
+    <RedisVersion>2.1.30</RedisVersion>
+    <DockerVersion>3.125.2</DockerVersion>
+    <FluentAssertionsVersion>5.10.3</FluentAssertionsVersion>
+    <NetCoreTestVersion>netcoreapp3.1</NetCoreTestVersion>
+    <NetStandardVersion>netstandard2.0</NetStandardVersion>
+    <NetFrameworkTestVersion>net461</NetFrameworkTestVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
+  </PropertyGroup>
+  <!-- SourceLink support for all Akka.NET projects -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+  <PropertyGroup>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <!-- Optional: Embed source files that are not tracked by the source control manager in the PDB -->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <!-- Optional: Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+</Project>

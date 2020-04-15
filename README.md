@@ -1,6 +1,6 @@
 # Akka.Persistence.Redis 
 
-[![Build status](https://ci.appveyor.com/api/projects/status/uxdr5352akbdi605/branch/dev?svg=true)](https://ci.appveyor.com/project/akkadotnet-contrib/akka-persistence-redis/branch/dev) [![NuGet Version](http://img.shields.io/nuget/v/Akka.Persistence.Redis.svg?style=flat)](https://www.nuget.org/packages/Akka.Persistence.Redis)
+[![NuGet Version](http://img.shields.io/nuget/v/Akka.Persistence.Redis.svg?style=flat)](https://www.nuget.org/packages/Akka.Persistence.Redis)
 
 Akka Persistence Redis Plugin is a plugin for `Akka persistence` that provides several components:
  - a journal store ;
@@ -27,7 +27,7 @@ akka.persistence.journal.plugin = "akka.persistence.journal.redis"
 This will run the journal with its default settings. The default settings can be changed with the configuration properties defined in your HOCON config:
 
 ### Configuration
-- `configuration-string` - connection string, as described here: https://github.com/StackExchange/StackExchange.Redis/blob/master/Docs/Configuration.md#basic-configuration-strings
+- `configuration-string` - connection string, as described here: https://github.com/StackExchange/StackExchange.Redis/blob/master/docs/Configuration.md#basic-configuration-strings
 - `key-prefix` - Redis journals key prefixes. Leave it for default or change it to appropriate value. WARNING: don't change it on production instances.
 
 ## Snapshot config
@@ -38,7 +38,7 @@ akka.persistence.snapshot-store.plugin = "akka.persistence.snapshot-store.redis"
 This will run the snapshot-store with its default settings. The default settings can be changed with the configuration properties defined in your HOCON config:
 
 ### Configuration
-- `configuration-string` - connection string, as described here: https://github.com/StackExchange/StackExchange.Redis/blob/master/Docs/Configuration.md#basic-configuration-strings
+- `configuration-string` - connection string, as described here: https://github.com/StackExchange/StackExchange.Redis/blob/master/docs/Configuration.md#basic-configuration-strings
 - `key-prefix` - Redis journals key prefixes. Leave it for default or change it to appropriate value. WARNING: don't change it on production instances.
 
 ## Persistence Query
