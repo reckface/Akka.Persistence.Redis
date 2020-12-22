@@ -1,20 +1,21 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="RedisJournalPerfSpec.cs" company="Akka.NET Project">
+// <copyright file="RedisCurrentAllEventsSpec.cs" company="Akka.NET Project">
 //     Copyright (C) 2017 Akka.NET Contrib <https://github.com/AkkaNetContrib/Akka.Persistence.Redis>
 // </copyright>
 //-----------------------------------------------------------------------
 
-using System;
+
 using Akka.Configuration;
+using Akka.Persistence.Query;
 using Akka.Persistence.Redis.Query;
-using Akka.Persistence.TestKit.Performance;
+using Akka.Persistence.TCK.Query;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Akka.Persistence.Redis.Tests
+namespace Akka.Persistence.Redis.Tests.Query
 {
     [Collection("RedisSpec")]
-    public class RedisJournalPerfSpec : JournalPerfSpec
+    public class RedisCurrentAllEventsSpec : CurrentAllEventsSpec
     {
         public const int Database = 1;
 
@@ -26,27 +27,30 @@ namespace Akka.Persistence.Redis.Tests
             akka.loglevel = INFO
             akka.persistence.journal.plugin = ""akka.persistence.journal.redis""
             akka.persistence.journal.redis {{
+                event-adapters {{
+                  color-tagger  = ""Akka.Persistence.TCK.Query.ColorFruitTagger, Akka.Persistence.TCK""
+                }}
+                event-adapter-bindings = {{
+                  ""System.String"" = color-tagger
+                }}
                 class = ""Akka.Persistence.Redis.Journal.RedisJournal, Akka.Persistence.Redis""
                 plugin-dispatcher = ""akka.actor.default-dispatcher""
                 configuration-string = ""{fixture.ConnectionString}""
                 database = {id}
             }}
             akka.test.single-expect-default = 3s")
-            .WithFallback(RedisPersistence.DefaultConfig())
-            .WithFallback(Persistence.DefaultConfig());
+            .WithFallback(RedisPersistence.DefaultConfig());
         }
 
-        public RedisJournalPerfSpec(ITestOutputHelper output, RedisFixture fixture) : base(Config(fixture, Database), nameof(RedisJournalPerfSpec), output)
+        public RedisCurrentAllEventsSpec(ITestOutputHelper output, RedisFixture fixture) : base(Config(fixture, Database), nameof(RedisCurrentAllEventsSpec), output)
         {
-            EventsCount = 1000;
-            ExpectDuration = TimeSpan.FromMinutes(10);
-            MeasurementIterations = 1;
+            ReadJournal = Sys.ReadJournalFor<RedisReadJournal>(RedisReadJournal.Identifier);
         }
 
         protected override void Dispose(bool disposing)
         {
-            base.Dispose(disposing);
             DbUtils.Clean(Database);
+            base.Dispose(disposing);
         }
     }
 }
