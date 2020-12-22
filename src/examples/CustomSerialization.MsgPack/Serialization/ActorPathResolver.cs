@@ -40,26 +40,27 @@ namespace CustomSerialization.MsgPack.Serialization
 
     public class ActorPathFormatter<T> : IMessagePackFormatter<T> where T : ActorPath
     {
-        
-        public void Serialize(ref MessagePackWriter writer, T value, MessagePackSerializerOptions options)
+        public int Serialize(ref byte[] bytes, int offset, T value, IFormatterResolver formatterResolver)
         {
             if (value == null)
             {
-                writer.WriteNil();
-
-                return;
+                return MessagePackBinary.WriteNil(ref bytes, offset);
             }
-            writer.Write(value.ToSerializationFormat());
+
+            var startOffset = offset;
+            offset += MessagePackBinary.WriteString(ref bytes, offset, value.ToSerializationFormat());
+            return offset - startOffset;
         }
 
-        public T Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+        public T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
         {
-            if (reader.IsNil)
+            if (MessagePackBinary.IsNil(bytes, offset))
             {
+                readSize = 1;
                 return null;
             }
 
-            var path = reader.ReadString();
+            var path = MessagePackBinary.ReadString(bytes, offset, out readSize);
             return ActorPath.TryParse(path, out var actorPath) ? (T)actorPath : null;
         }
     }

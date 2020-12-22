@@ -15,7 +15,6 @@ using Akka.Pattern;
 
 namespace CustomSerialization.Protobuf
 {
-    
     class Program
     {
         // if you want to benchmark your persistent storage provides, paste the configuration in string below
