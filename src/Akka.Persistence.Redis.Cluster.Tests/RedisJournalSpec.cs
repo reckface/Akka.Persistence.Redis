@@ -1,24 +1,20 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="RedisJournalPerfSpec.cs" company="Akka.NET Project">
+// <copyright file="RedisJournalSpec.cs" company="Akka.NET Project">
 //     Copyright (C) 2017 Akka.NET Contrib <https://github.com/AkkaNetContrib/Akka.Persistence.Redis>
 // </copyright>
 //-----------------------------------------------------------------------
 
-using System;
 using Akka.Configuration;
-using Akka.Persistence.Redis.Query;
-using Akka.Persistence.TestKit.Performance;
+using Akka.Persistence.TCK.Journal;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Akka.Persistence.Redis.Tests
+namespace Akka.Persistence.Redis.Cluster.Test
 {
-    [Collection("RedisSpec")]
-    public class RedisJournalPerfSpec : JournalPerfSpec
+    [Collection("RedisClusterSpec")]
+    public class RedisJournalSpec : JournalSpec
     {
-        public const int Database = 1;
-
-        public static Config Config(RedisFixture fixture, int id)
+        public static Config Config(RedisClusterFixture fixture)
         {
             DbUtils.Initialize(fixture);
 
@@ -28,22 +24,25 @@ namespace Akka.Persistence.Redis.Tests
             akka.persistence.journal.redis {{
                 class = ""Akka.Persistence.Redis.Journal.RedisJournal, Akka.Persistence.Redis""
                 plugin-dispatcher = ""akka.actor.default-dispatcher""
-                configuration-string = ""{fixture.ConnectionString}""
-                database = {id}
+                configuration-string = ""{DbUtils.ConnectionString}""
             }}
             akka.test.single-expect-default = 3s")
-            .WithFallback(RedisPersistence.DefaultConfig())
-            .WithFallback(Persistence.DefaultConfig());
+            .WithFallback(RedisPersistence.DefaultConfig());
         }
 
-        public RedisJournalPerfSpec(ITestOutputHelper output, RedisFixture fixture) : base(Config(fixture, Database), nameof(RedisJournalPerfSpec), output)
+        public RedisJournalSpec(ITestOutputHelper output, RedisClusterFixture fixture)
+            : base(Config(fixture), nameof(RedisJournalSpec), output)
         {
+            RedisPersistence.Get(Sys);
+            Initialize();
         }
+
+        protected override bool SupportsRejectingNonSerializableObjects { get; } = false;
 
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-            DbUtils.Clean(Database);
+            DbUtils.Clean();
         }
     }
 }
