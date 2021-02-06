@@ -9,14 +9,12 @@ using Akka.Persistence.TCK.Snapshot;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Akka.Persistence.Redis.Tests
+namespace Akka.Persistence.Redis.Cluster.Test
 {
-    [Collection("RedisSpec")]
+    [Collection("RedisClusterSpec")]
     public class RedisSnapshotStoreSpec : SnapshotStoreSpec
     {
-        public const int Database = 1;
-
-        public static Config Config(RedisFixture fixture, int id)
+        public static Config Config(RedisClusterFixture fixture)
         {
             DbUtils.Initialize(fixture);
 
@@ -30,7 +28,6 @@ namespace Akka.Persistence.Redis.Tests
                             class = ""Akka.Persistence.Redis.Snapshot.RedisSnapshotStore, Akka.Persistence.Redis""
                             configuration-string = ""{fixture.ConnectionString}""
                             plugin-dispatcher = ""akka.actor.default-dispatcher""
-                            database = ""{id}""
                         }}
                     }}
                 }}
@@ -47,8 +44,8 @@ namespace Akka.Persistence.Redis.Tests
                 }}").WithFallback(RedisPersistence.DefaultConfig());
         }
 
-        public RedisSnapshotStoreSpec(ITestOutputHelper output, RedisFixture fixture)
-            : base(Config(fixture, Database), typeof(RedisSnapshotStoreSpec).Name, output)
+        public RedisSnapshotStoreSpec(ITestOutputHelper output, RedisClusterFixture fixture)
+            : base(Config(fixture), nameof(RedisSnapshotStoreSpec), output)
         {
             RedisPersistence.Get(Sys);
             Initialize();
@@ -57,7 +54,7 @@ namespace Akka.Persistence.Redis.Tests
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-            DbUtils.Clean(Database);
+            DbUtils.Clean();
         }
     }
 }

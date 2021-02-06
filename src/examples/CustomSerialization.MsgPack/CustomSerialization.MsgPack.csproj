@@ -5,6 +5,7 @@
     <OutputType>Exe</OutputType>
     <TargetFrameworks>$(NetCoreTestVersion)</TargetFrameworks>
     <ServerGarbageCollection>true</ServerGarbageCollection>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MessagePack" Version="1.9.11" />
+    <PackageReference Include="MessagePack" Version="2.2.85" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == '$(NetFrameworkTestVersion)' ">

@@ -1,12 +1,11 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="RedisFixture.cs" company="Akka.NET Project">
+// <copyright file="RedisClusterFixture.cs" company="Akka.NET Project">
 //      Copyright (C) 2013-2021 .NET Foundation <https://github.com/akkadotnet/akka.net>
 // </copyright>
 // -----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Akka.Util;
@@ -14,19 +13,19 @@ using Docker.DotNet;
 using Docker.DotNet.Models;
 using Xunit;
 
-namespace Akka.Persistence.Redis.Tests
+namespace Akka.Persistence.Redis.Cluster.Test
 {
-    [CollectionDefinition("RedisSpec")]
-    public sealed class RedisSpecsFixture : ICollectionFixture<RedisFixture>
+    [CollectionDefinition("RedisClusterSpec")]
+    public sealed class RedisSpecsFixture : ICollectionFixture<RedisClusterFixture>
     {
     }
 
-    public class RedisFixture : IAsyncLifetime
+    public class RedisClusterFixture : IAsyncLifetime
     {
-        protected readonly string RedisContainerName = $"redis-{Guid.NewGuid():N}";
+        protected readonly string RedisContainerName = $"redis-cluster-{Guid.NewGuid():N}";
         protected DockerClient Client;
 
-        public RedisFixture()
+        public RedisClusterFixture()
         {
             DockerClientConfiguration config;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -39,7 +38,7 @@ namespace Akka.Persistence.Redis.Tests
             Client = config.CreateClient();
         }
 
-        protected string ImageName => "redis";
+        protected string ImageName => "grokzen/redis-cluster";
         protected string Tag => "latest";
         protected string RedisImageName => $"{ImageName}:{Tag}";
 
@@ -56,7 +55,7 @@ namespace Akka.Persistence.Redis.Tests
             });
             if (images.Count == 0)
                 await Client.Images.CreateImageAsync(
-                    new ImagesCreateParameters {FromImage = ImageName, Tag = Tag}, null,
+                    new ImagesCreateParameters {FromImage = RedisImageName, Tag = "latest"}, null,
                     new Progress<JSONMessage>(message =>
                     {
                         Console.WriteLine(!string.IsNullOrEmpty(message.ErrorMessage)
@@ -72,26 +71,56 @@ namespace Akka.Persistence.Redis.Tests
                 Image = RedisImageName,
                 Name = RedisContainerName,
                 Tty = true,
-                ExposedPorts = new Dictionary<string, EmptyStruct> {{"6379/tcp", new EmptyStruct()}},
+                Env = new List<string> {"IP=0.0.0.0", $"INITIAL_PORT={redisHostPort}"},
+                ExposedPorts =
+                    new Dictionary<string, EmptyStruct>
+                    {
+                        {$"{redisHostPort}/tcp", new EmptyStruct()},
+                        {$"{redisHostPort + 1}/tcp", new EmptyStruct()},
+                        {$"{redisHostPort + 2}/tcp", new EmptyStruct()},
+                        {$"{redisHostPort + 3}/tcp", new EmptyStruct()},
+                        {$"{redisHostPort + 4}/tcp", new EmptyStruct()},
+                        {$"{redisHostPort + 5}/tcp", new EmptyStruct()}
+                    },
                 HostConfig = new HostConfig
                 {
                     PortBindings = new Dictionary<string, IList<PortBinding>>
                     {
                         {
-                            "6379/tcp", new List<PortBinding> {new PortBinding {HostPort = $"{redisHostPort}"}}
+                            $"{redisHostPort}/tcp",
+                            new List<PortBinding> {new PortBinding {HostPort = $"{redisHostPort}"}}
+                        },
+                        {
+                            $"{redisHostPort + 1}/tcp",
+                            new List<PortBinding> {new PortBinding {HostPort = $"{redisHostPort + 1}"}}
+                        },
+                        {
+                            $"{redisHostPort + 2}/tcp",
+                            new List<PortBinding> {new PortBinding {HostPort = $"{redisHostPort + 2}"}}
+                        },
+                        {
+                            $"{redisHostPort + 3}/tcp",
+                            new List<PortBinding> {new PortBinding {HostPort = $"{redisHostPort + 3}"}}
+                        },
+                        {
+                            $"{redisHostPort + 4}/tcp",
+                            new List<PortBinding> {new PortBinding {HostPort = $"{redisHostPort + 4}"}}
+                        },
+                        {
+                            $"{redisHostPort + 5}/tcp",
+                            new List<PortBinding> {new PortBinding {HostPort = $"{redisHostPort + 5}"}}
                         }
                     }
                 }
             });
 
-
             // start the container
             await Client.Containers.StartContainerAsync(RedisContainerName, new ContainerStartParameters());
 
-            // Provide a 30 second startup delay
+            // Provide a 10 second startup delay
             await Task.Delay(TimeSpan.FromSeconds(10));
 
-            ConnectionString = $"localhost:{redisHostPort}";
+            ConnectionString = $"127.0.0.1:{redisHostPort}";
         }
 
         public async Task DisposeAsync()

@@ -1,19 +1,27 @@
-﻿// -----------------------------------------------------------------------
-// <copyright file="RedisJournalPerfSpec.cs" company="Akka.NET Project">
+// -----------------------------------------------------------------------
+// <copyright file="RedisJournalBenchmarks.cs" company="Akka.NET Project">
 //      Copyright (C) 2013-2021 .NET Foundation <https://github.com/akkadotnet/akka.net>
 // </copyright>
 // -----------------------------------------------------------------------
 
 using System;
 using Akka.Configuration;
+using Akka.Persistence.Redis.BenchmarkTests.Docker;
+using Akka.Persistence.Redis.Tests;
 using Akka.Persistence.TestKit.Performance;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Akka.Persistence.Redis.Tests
+namespace Akka.Persistence.Redis.Benchmark.DockerTests
 {
-    [Collection("RedisSpec")]
-    public class RedisJournalPerfSpec : JournalPerfSpec
+    public class TestConstants
+    {
+        public const int NumMessages = 1000;
+        public const int DockerNumMessages = 1000;
+    }
+
+    [Collection("RedisBenchmark")]
+    public class RedisJournalPerfSpec : RedisJournalBenchmarkDefinitions, IClassFixture<RedisFixture>
     {
         public const int Database = 1;
 
@@ -35,9 +43,15 @@ namespace Akka.Persistence.Redis.Tests
                 .WithFallback(Persistence.DefaultConfig());
         }
 
-        public RedisJournalPerfSpec(ITestOutputHelper output, RedisFixture fixture) : base(Config(fixture, Database),
-            nameof(RedisJournalPerfSpec), output)
+        public RedisJournalPerfSpec(ITestOutputHelper output, RedisFixture fixture)
+            : base(Config(fixture, Database), nameof(RedisJournalPerfSpec), output, 40, TestConstants.DockerNumMessages)
         {
+        }
+
+        [Fact]
+        public void PersistenceActor_Must_measure_PersistGroup1000()
+        {
+            RunGroupBenchmark(1000, 10);
         }
 
         protected override void Dispose(bool disposing)

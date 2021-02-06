@@ -1,9 +1,8 @@
-﻿//-----------------------------------------------------------------------
+﻿// -----------------------------------------------------------------------
 // <copyright file="ActorPathResolver.cs" company="Akka.NET Project">
-//     Copyright (C) 2009-2016 Lightbend Inc. <http://www.lightbend.com>
-//     Copyright (C) 2013-2016 Akka.NET project <https://github.com/akkadotnet/akka.net>
+//      Copyright (C) 2013-2021 .NET Foundation <https://github.com/akkadotnet/akka.net>
 // </copyright>
-//-----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -16,13 +15,24 @@ namespace CustomSerialization.MsgPack.Serialization
     public class ActorPathResolver : IFormatterResolver
     {
         public static IFormatterResolver Instance = new ActorPathResolver();
-        private ActorPathResolver() { }
-        public IMessagePackFormatter<T> GetFormatter<T>() => FormatterCache<T>.Formatter;
+
+        private ActorPathResolver()
+        {
+        }
+
+        public IMessagePackFormatter<T> GetFormatter<T>()
+        {
+            return FormatterCache<T>.Formatter;
+        }
 
         private static class FormatterCache<T>
         {
             public static readonly IMessagePackFormatter<T> Formatter;
-            static FormatterCache() => Formatter = (IMessagePackFormatter<T>)ActorPathResolverGetFormatterHelper.GetFormatter(typeof(T));
+
+            static FormatterCache()
+            {
+                Formatter = (IMessagePackFormatter<T>) ActorPathResolverGetFormatterHelper.GetFormatter(typeof(T));
+            }
         }
     }
 
@@ -35,33 +45,32 @@ namespace CustomSerialization.MsgPack.Serialization
             {typeof(RootActorPath), new ActorPathFormatter<RootActorPath>()}
         };
 
-        internal static object GetFormatter(Type t) => FormatterMap.TryGetValue(t, out var formatter) ? formatter : null;
+        internal static object GetFormatter(Type t)
+        {
+            return FormatterMap.TryGetValue(t, out var formatter) ? formatter : null;
+        }
     }
 
     public class ActorPathFormatter<T> : IMessagePackFormatter<T> where T : ActorPath
     {
-        public int Serialize(ref byte[] bytes, int offset, T value, IFormatterResolver formatterResolver)
+        public void Serialize(ref MessagePackWriter writer, T value, MessagePackSerializerOptions options)
         {
             if (value == null)
             {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
+                writer.WriteNil();
+
+                return;
             }
 
-            var startOffset = offset;
-            offset += MessagePackBinary.WriteString(ref bytes, offset, value.ToSerializationFormat());
-            return offset - startOffset;
+            writer.Write(value.ToSerializationFormat());
         }
 
-        public T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public T Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
         {
-            if (MessagePackBinary.IsNil(bytes, offset))
-            {
-                readSize = 1;
-                return null;
-            }
+            if (reader.IsNil) return null;
 
-            var path = MessagePackBinary.ReadString(bytes, offset, out readSize);
-            return ActorPath.TryParse(path, out var actorPath) ? (T)actorPath : null;
+            var path = reader.ReadString();
+            return ActorPath.TryParse(path, out var actorPath) ? (T) actorPath : null;
         }
     }
 }

@@ -1,13 +1,14 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="RedisFixture.cs" company="Akka.NET Project">
+// <copyright file="RedisClusterFixture.cs" company="Akka.NET Project">
 //      Copyright (C) 2013-2021 .NET Foundation <https://github.com/akkadotnet/akka.net>
 // </copyright>
 // -----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using Akka.Util;
 using Docker.DotNet;
@@ -16,17 +17,17 @@ using Xunit;
 
 namespace Akka.Persistence.Redis.Tests
 {
-    [CollectionDefinition("RedisSpec")]
-    public sealed class RedisSpecsFixture : ICollectionFixture<RedisFixture>
+    [CollectionDefinition("RedisClusterSpec")]
+    public sealed class RedisClusterSpecsFixture : ICollectionFixture<RedisClusterFixture>
     {
     }
 
-    public class RedisFixture : IAsyncLifetime
+    public class RedisClusterFixture : IAsyncLifetime
     {
         protected readonly string RedisContainerName = $"redis-{Guid.NewGuid():N}";
         protected DockerClient Client;
 
-        public RedisFixture()
+        public RedisClusterFixture()
         {
             DockerClientConfiguration config;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -39,24 +40,16 @@ namespace Akka.Persistence.Redis.Tests
             Client = config.CreateClient();
         }
 
-        protected string ImageName => "redis";
-        protected string Tag => "latest";
-        protected string RedisImageName => $"{ImageName}:{Tag}";
+        protected string RedisImageName => "grokzen/redis-cluster";
 
         public string ConnectionString { get; private set; }
 
         public async Task InitializeAsync()
         {
-            var images = await Client.Images.ListImagesAsync(new ImagesListParameters
-            {
-                Filters = new Dictionary<string, IDictionary<string, bool>>
-                {
-                    {"reference", new Dictionary<string, bool> {{RedisImageName, true}}}
-                }
-            });
+            var images = await Client.Images.ListImagesAsync(new ImagesListParameters {MatchName = RedisImageName});
             if (images.Count == 0)
                 await Client.Images.CreateImageAsync(
-                    new ImagesCreateParameters {FromImage = ImageName, Tag = Tag}, null,
+                    new ImagesCreateParameters {FromImage = RedisImageName, Tag = "latest"}, null,
                     new Progress<JSONMessage>(message =>
                     {
                         Console.WriteLine(!string.IsNullOrEmpty(message.ErrorMessage)

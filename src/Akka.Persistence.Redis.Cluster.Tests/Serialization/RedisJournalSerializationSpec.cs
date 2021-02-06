@@ -9,14 +9,12 @@ using Akka.Persistence.TCK.Serialization;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Akka.Persistence.Redis.Tests.Serialization
+namespace Akka.Persistence.Redis.Cluster.Test.Serialization
 {
-    [Collection("RedisSpec")]
+    [Collection("RedisClusterSpec")]
     public class RedisJournalSerializationSpec : JournalSerializationSpec
     {
-        public const int Database = 1;
-
-        public static Config Config(RedisFixture fixture, int id)
+        public static Config Config(RedisClusterFixture fixture)
         {
             DbUtils.Initialize(fixture);
 
@@ -33,14 +31,13 @@ namespace Akka.Persistence.Redis.Tests.Serialization
                 class = ""Akka.Persistence.Redis.Journal.RedisJournal, Akka.Persistence.Redis""
                 plugin-dispatcher = ""akka.actor.default-dispatcher""
                 configuration-string = ""{fixture.ConnectionString}""
-                database = {id}
             }}
             akka.test.single-expect-default = 3s")
                 .WithFallback(RedisPersistence.DefaultConfig());
         }
 
-        public RedisJournalSerializationSpec(ITestOutputHelper output, RedisFixture fixture) : base(
-            Config(fixture, Database), nameof(RedisJournalSerializationSpec), output)
+        public RedisJournalSerializationSpec(ITestOutputHelper output, RedisClusterFixture fixture)
+            : base(Config(fixture), nameof(RedisJournalSerializationSpec), output)
         {
         }
 
@@ -52,9 +49,9 @@ namespace Akka.Persistence.Redis.Tests.Serialization
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-            DbUtils.Clean(Database);
+            DbUtils.Clean();
         }
 
-        protected override bool SupportsSerialization => true;
+        protected override bool SupportsSerialization => false;
     }
 }
