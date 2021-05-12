@@ -8,6 +8,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Akka.Actor;
+using Akka.Configuration;
 using Akka.Persistence.Snapshot;
 using StackExchange.Redis;
 
@@ -15,21 +16,18 @@ namespace Akka.Persistence.Redis.Snapshot
 {
     public class RedisSnapshotStore : SnapshotStore
     {
+        protected static readonly RedisPersistence Extension = RedisPersistence.Get(Context.System);
+
         private readonly RedisSettings _settings;
-        private Lazy<IDatabase> _database;
-        private ActorSystem _system;
+        private readonly Lazy<IDatabase> _database;
+        private readonly ActorSystem _system;
         public IDatabase Database => _database.Value;
 
         public bool IsClustered { get; private set; }
 
-        public RedisSnapshotStore()
+        public RedisSnapshotStore(Config snapshotConfig)
         {
-            _settings = RedisPersistence.Get(Context.System).SnapshotStoreSettings;
-        }
-
-        protected override void PreStart()
-        {
-            base.PreStart();
+            _settings = RedisSettings.Create(snapshotConfig.WithFallback(Extension.DefaultSnapshotConfig));
 
             _system = Context.System;
             _database = new Lazy<IDatabase>(() =>
