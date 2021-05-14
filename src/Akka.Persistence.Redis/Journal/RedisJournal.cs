@@ -10,6 +10,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Akka.Actor;
+using Akka.Configuration;
 using Akka.Persistence.Journal;
 using Akka.Persistence.Redis.Query;
 using Akka.Util.Internal;
@@ -19,6 +20,7 @@ namespace Akka.Persistence.Redis.Journal
 {
     public class RedisJournal : AsyncWriteJournal
     {
+        protected static readonly RedisPersistence Extension = RedisPersistence.Get(Context.System);
         private readonly HashSet<IActorRef> _newEventsSubscriber = new HashSet<IActorRef>();
 
         private readonly RedisSettings _settings;
@@ -31,9 +33,9 @@ namespace Akka.Persistence.Redis.Journal
 
         protected bool HasNewEventSubscribers => _newEventsSubscriber.Count != 0;
 
-        public RedisJournal()
+        public RedisJournal(Config journalConfig)
         {
-            _settings = RedisPersistence.Get(Context.System).JournalSettings;
+            _settings = RedisSettings.Create(journalConfig.WithFallback(Extension.DefaultJournalConfig));
             _journalHelper = new JournalHelper(Context.System, _settings.KeyPrefix);
             _system = Context.System;
             _database = new Lazy<IDatabase>(() =>
